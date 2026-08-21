@@ -1,0 +1,64 @@
+accelerator: auto
+data:
+  add_noise_in_val: true
+  batch_size: 16
+  dir_dataset: data
+  is_U2D: true
+  is_separate_antennas: true
+  num_workers: 0
+  return_metadata: false
+  shuffle: true
+  train_ratio: 0.9
+deterministic: false
+devices: 1
+experiment_name: FDD_ALC_RNN_STAGE1
+loss:
+  name: NMSE
+  params: {}
+model:
+  checkpoint_path: null
+  is_separate_antennas: true
+  name: ALC_RNN_FDD
+  params:
+    dim_data: 600
+    pred_len: 4
+    rnn_hidden_dim: 1200
+    rnn_num_layers: 4
+model_name: ALC_RNN
+optimizer:
+  name: Adam
+  params:
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    lr: 0.0005
+    weight_decay: 0.0001
+output_dir: outputs/stage1_predictor
+precision: '32'
+prefix: FDD
+scheduler:
+  name: ReduceLROnPlateau
+  params:
+    cooldown: 2
+    factor: 0.1
+    min_lr: 1.0e-06
+    mode: min
+    patience: 5
+    threshold: 0.0001
+seed: 42
+training:
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  early_stopping: true
+  early_stopping_min_delta: 0.0001
+  early_stopping_mode: min
+  early_stopping_patience: 20
+  enable_model_summary: true
+  enable_progress_bar: true
+  gradient_clip_val: 1.0
+  log_every_n_steps: 20
+  monitor_metric: val_loss
+  monitor_mode: min
+  num_epochs: 200
+  save_top_k: 1

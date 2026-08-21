@@ -1,0 +1,126 @@
+accelerator: auto
+data:
+  add_noise_in_val: true
+  batch_size: 16
+  dir_dataset: data
+  is_U2D: true
+  is_separate_antennas: true
+  num_workers: 0
+  return_metadata: true
+  shuffle: true
+  train_ratio: 0.9
+deterministic: false
+devices: 1
+experiment_name: FDD_ADAPTIVE_EXPERT_STAGE2_TEMPORAL_SPECTRAL
+loss:
+  name: NMSE
+  params: {}
+model:
+  checkpoint_path: null
+  is_separate_antennas: true
+  name: ADAPTIVE_RNN_FDD
+  params:
+    adaptive_pretrained_path: null
+    controller:
+      dropout: 0.1
+      hidden_dim: 128
+      in_dim: 10
+      num_actions: 4
+      use_layernorm: true
+    expert_dropout: 0.0
+    expert_pretrain_mode: true
+    expert_spectral_channels: 16
+    expert_temporal_hidden_dim: 128
+    expert_type: temporal_spectral
+    expert_use_layernorm: false
+    expert_use_temporal: true
+    freeze_controller: true
+    freeze_experts: false
+    freeze_predictor: true
+    full_dim: 256
+    full_hidden_dims:
+    - 512
+    - 256
+    gumbel_anneal_steps: 10000
+    gumbel_tau_end: 0.5
+    gumbel_tau_start: 2.0
+    high_dim: 128
+    high_hidden_dims:
+    - 256
+    - 128
+    lambda_avg: 0.0
+    lambda_base: 0.0
+    lambda_ce: 0.0
+    lambda_high: 1.0
+    lambda_low: 1.0
+    lambda_peak: 0.0
+    lambda_qos: 0.0
+    lambda_rec: 0.0
+    lambda_refresh: 1.0
+    low_dim: 32
+    low_hidden_dims:
+    - 256
+    - 128
+    oracle_quantiles:
+    - 0.15
+    - 0.5
+    - 0.85
+    peak_budget: 256.0
+    predictor:
+      cm_emb_dim: 8
+      cm_vocab_size: 16
+      dim_data: 600
+      meta_hidden_dim: 16
+      pred_len: 4
+      rnn_hidden_dim: 1200
+      rnn_num_layers: 4
+      use_metadata_gate: true
+    predictor_pretrained_path: checkpoints/stage1_predictor.ckpt
+    qos_threshold: 0.05
+    rate_values:
+    - 0.0
+    - 32.0
+    - 128.0
+    - 256.0
+    target_avg_budget: 96.0
+    train_hard_gumbel: false
+    train_route_mode: soft
+    use_oracle_ce: false
+model_name: ADAPTIVE_RNN
+optimizer:
+  name: Adam
+  params:
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    lr: 0.0005
+    weight_decay: 0.0001
+output_dir: outputs/stage2_experts
+precision: '32'
+prefix: FDD
+scheduler:
+  name: ReduceLROnPlateau
+  params:
+    cooldown: 2
+    factor: 0.1
+    min_lr: 1.0e-06
+    mode: min
+    patience: 8
+    threshold: 0.0001
+seed: 42
+training:
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  early_stopping: true
+  early_stopping_min_delta: 0.0001
+  early_stopping_mode: min
+  early_stopping_patience: 30
+  enable_model_summary: true
+  enable_progress_bar: true
+  gradient_clip_val: 1.0
+  log_every_n_steps: 20
+  monitor_metric: val_loss
+  monitor_mode: min
+  num_epochs: 300
+  save_top_k: 1

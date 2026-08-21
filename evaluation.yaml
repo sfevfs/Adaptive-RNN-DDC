@@ -1,0 +1,162 @@
+seed: 42
+deterministic: false
+accelerator: auto
+devices: 1
+precision: '32'
+prefix: FDD
+model_name: ADAPTIVE_RNN
+experiment_name: FDD_ADAPTIVE_ROUTER_STAGE3_TEMPORAL_SPECTRAL_ROUTERCTX16_FILM_NOCM_HIGHDS_HRSPEC_S5_T115_EVAL
+output_dir: outputs/evaluation
+data:
+  dir_dataset: data
+  batch_size: 16
+  num_workers: 0
+  is_U2D: true
+  shuffle: true
+  train_ratio: 0.9
+  is_separate_antennas: true
+  return_metadata: true
+  add_noise_in_val: true
+model:
+  name: ADAPTIVE_RNN_FDD
+  is_separate_antennas: true
+  checkpoint_path: null
+  params:
+    predictor:
+      dim_data: 600
+      rnn_hidden_dim: 1200
+      rnn_num_layers: 4
+      pred_len: 4
+      use_metadata_gate: true
+      cm_vocab_size: 16
+      cm_emb_dim: 8
+      meta_hidden_dim: 16
+    controller:
+      in_dim: 16
+      hidden_dim: 128
+      num_actions: 4
+      dropout: 0.1
+      use_layernorm: true
+      use_context: true
+      type: two_stage
+      budget_normalizer: 256.0
+      context_scale_init: 0.1
+      use_cm_embedding: false
+      use_film_context: true
+      context_mid_ds_threshold: 0.5
+      context_high_ds_threshold: 0.875
+    low_dim: 32
+    high_dim: 128
+    full_dim: 256
+    low_hidden_dims:
+    - 256
+    - 128
+    high_hidden_dims:
+    - 256
+    - 128
+    full_hidden_dims:
+    - 512
+    - 256
+    expert_dropout: 0.0
+    expert_use_layernorm: false
+    rate_values:
+    - 0.0
+    - 32.0
+    - 128.0
+    - 256.0
+    target_avg_budget: 128.0
+    peak_budget: 256.0
+    qos_threshold: 0.05
+    adaptive_pretrained_path: checkpoints/stage2_experts.ckpt
+    predictor_pretrained_path: null
+    freeze_predictor: true
+    freeze_controller: false
+    freeze_experts: true
+    use_oracle_ce: false
+    oracle_quantiles:
+    - 0.15
+    - 0.5
+    - 0.85
+    gumbel_tau_start: 1.0
+    gumbel_tau_end: 0.3
+    gumbel_anneal_steps: 5000
+    train_hard_gumbel: false
+    train_route_mode: soft
+    expert_pretrain_mode: false
+    lambda_rec: 1.0
+    lambda_base: 0.0
+    lambda_avg: 0.0
+    lambda_peak: 0.005
+    lambda_qos: 0.05
+    lambda_ce: 0.0
+    lambda_low: 1.0
+    lambda_high: 1.0
+    lambda_refresh: 1.0
+    expert_type: temporal_spectral
+    expert_spectral_channels: 16
+    expert_temporal_hidden_dim: 128
+    expert_use_temporal: true
+    disable_skip_action: true
+    use_cost_teacher: false
+    cost_teacher_budget_lambda: 1.0e-07
+    cost_teacher_skip_penalty: 0.0
+    cost_teacher_low_penalty: 0.0
+    cost_teacher_high_penalty: 0.0
+    cost_teacher_refresh_penalty: 0.0
+    cost_teacher_ce_weight: 1.0
+    use_soft_cost_teacher: true
+    soft_cost_teacher_temperature: 5.0e-05
+    soft_cost_teacher_kl_weight: 1.0
+    cost_teacher_class_weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    controller_type: two_stage
+    use_two_stage_loss: true
+    two_stage_hr_weight: 1.0
+    two_stage_gate_threshold: 0.5
+    two_stage_gate_threshold_high: 0.5
+    two_stage_gate_threshold_refresh: 0.5
+    high_ds_gate_boost: 1.0
+    high_ds_low_penalty: 1.0
+    high_ds_threshold_ns: 350.0
+    high_ds_hr_spectral_prior_strength: 5.0
+    high_ds_hr_spectral_threshold: 1.15
+    high_ds_hr_spectral_feature_index: 13
+training:
+  num_epochs: 1
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  early_stopping: false
+  early_stopping_patience: 15
+  early_stopping_min_delta: 0.0001
+  early_stopping_mode: min
+  save_top_k: 1
+  monitor_metric: val_loss
+  monitor_mode: min
+  log_every_n_steps: 20
+  enable_progress_bar: true
+  enable_model_summary: true
+optimizer:
+  name: Adam
+  params:
+    lr: 0.0005
+    weight_decay: 0.0001
+    eps: 1.0e-08
+    betas:
+    - 0.9
+    - 0.999
+scheduler:
+  name: ReduceLROnPlateau
+  params:
+    mode: min
+    factor: 0.1
+    patience: 5
+    threshold: 0.0001
+    cooldown: 1
+    min_lr: 1.0e-06
+loss:
+  name: NMSE
+  params: {}
